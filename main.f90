@@ -7,7 +7,7 @@ program main
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   integer :: l, n
-  real (kind=dp) :: Energy, Potential, radius,  delta
+  real (kind=dp) :: Energy, Potential, radius,  delta, R0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
@@ -15,9 +15,10 @@ program main
 
   !Energy = 8
   radius = 1.0
+  R0 = 2.0
   n = 1
 
-  print *, R(radius,n)
+  print *, R(radius,R0,n)
 
   !print *, Chi(Energy,radius)
 
@@ -32,10 +33,9 @@ contains
     Chi = sin(sqrt(2*E)*r)
   end function
 
-  function R(radius,n)
+  function R(radius,R0,n)
     !!! Function to to define trial wavefunction !!!
-    real (kind=dp), parameter :: R0 = 3.0
-    real (kind=dp) :: R, radius
+    real (kind=dp) :: R, R0,  radius
     integer :: n
 
     if (radius .LE. R0) then
