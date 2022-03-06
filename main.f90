@@ -6,31 +6,33 @@ program main
 !!!!!!!!!!!! DEFINE OBJECTS !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer :: l, n
-  real (kind=dp) :: Energy, Potential, radius,  delta, R0
+  integer :: angMomentum, n
+  real (kind=dp) :: energy, Potential, radius,  deltaL, R0
+  real (kind=dp) :: pi = atan(1.0) * 4.0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  !Energy = 8
-  radius = 1.0
+  energy = 8
+  radius = 4.0
   R0 = 2.0
   n = 1
+  angMomentum = 1
 
   print *, R(radius,R0,n)
 
-  !print *, Chi(Energy,radius)
+  call CalculatePhaseShift
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!! FUNCTIONS AND SUBROUTINES !!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
-  function Chi(E,r)
+  function Chi(R,radius)
     !!! Function to calculate the value for Chi (What is chi) !!!
-    real (kind=dp) :: Chi, E, r
+    real (kind=dp) :: Chi, radius, R
 
-    Chi = sin(sqrt(2*E)*r)
+    Chi = R * radius
   end function
 
   function R(radius,R0,n)
@@ -44,5 +46,19 @@ contains
       R = 0
     end if
   end function
+
+  function Wavenumber(energy)
+    !!! Function to calculate wavenumber k !!!
+    real (kind=dp) :: Wavenumber, energy
+
+    wavenumber = sqrt(energy * 2)
+  end function
+
+  subroutine CalculatePhaseShift
+    !!! Suboroutine to calculate the phase shift !!!
+    deltaL = asin(radius*R(radius,R0,n)) + (angMomentum*(pi/2)) - (Wavenumber(energy)*radius)
+
+    print *, 'Phase shift is: ', deltaL
+  end subroutine
 
 end program
