@@ -15,7 +15,7 @@ program main
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   energy = 8
-  radius = 4.0
+  radius = 1.0
   R0 = 2.0
   n = 1
   angMomentum = 1
@@ -62,3 +62,8 @@ contains
   end subroutine
 
 end program
+
+!!!!!!!!!!!!!
+!!! NOTES !!!
+!!!!!!!!!!!!!
+! – Chi used in CalculatePhaseShift might not be correct; rest should be okay
