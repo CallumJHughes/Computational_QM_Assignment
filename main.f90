@@ -6,8 +6,8 @@ program main
 !!!!!!!!!!!! DEFINE OBJECTS !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer :: angMomentum, n, intenergy, angMomentumMax
-  real (kind=dp) :: energy, Potential, radius,  deltaL, R0
+  integer :: angMomentum, n, intenergy
+  real (kind=dp) :: energy, Potential, radius,  deltaL, R0, totalPsi
   real (kind=dp) :: pi = atan(1.0) * 4.0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -24,7 +24,7 @@ program main
 
   print *, 'Bob' ! Test
 
-  do intenergy=0,200
+  do intenergy=0,20
     print *, intenergy
     energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
     print *, energy
@@ -32,7 +32,7 @@ program main
   end do
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!! FUNCTIONS AND SUBROUTINES !!!!!!!
+!!!!!!!!!!!!!!! FUNCTIONS !!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
   function Chi(R,radius)
@@ -64,14 +64,23 @@ contains
 
   function Psi(Chi,radius)
     !!! Calculate wavefunction for current radial function (chi) of current angular momentum !!!
+    real (kind=dp) :: Psi, Chi, radius
+
     Psi = Chi(R,radius) / radius
   end function
 
-  function AngMomentumMax
+  function AngMomentumMax(angMomentum)
     !!! Calculates maximum angular momentum value !!!
     !!! Any particles with higher angular momentum will just pass through unaffected so are ignored !!!
     !!! (Solve quadratic lmax**2 + lmax - (krmax)**2 = 0???)
+    integer :: AngMomentumMax, angMomentum
+
+    AngMomentumMax = angMomentum ! Just for testing
   end function
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!! SUBROUTINES !!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine CalculatePhaseShift
     !!! Suboroutine to calculate the phase shift !!!
