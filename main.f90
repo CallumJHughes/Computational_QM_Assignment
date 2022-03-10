@@ -7,7 +7,7 @@ program main
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   integer :: angMomentum, n, intenergy
-  real (kind=dp) :: energy, Potential, radius,  deltaL, R0, totalPsi
+  real (kind=dp) :: energy, Potential, radius,  deltaL, R0, totalPsi, sigma
   real (kind=dp) :: pi = atan(1.0) * 4.0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -24,11 +24,12 @@ program main
 
   print *, 'Bob' ! Test
 
-  do intenergy=0,20
+  do intenergy=0,2
     print *, intenergy
     energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
     print *, energy
     call CalculatePhaseShift
+    call CalcTotCrossSection
   end do
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -96,6 +97,17 @@ contains
     do angMomentum = 0, AngMomentumMax(angMomentum)
       totalPsi = totalPsi + Psi(Chi,radius)
     end do
+  end subroutine
+
+  subroutine CalcTotCrossSection
+    !!! Subroutine to calculate the total scattering cross section !!!
+    sigma = 0
+
+    do angMomentum = 0, angMomentumMax(angMomentum)
+      sigma = sigma + ((2*angMomentum + 1)*(sin(deltaL))**2)
+    end do
+
+    sigma = sigma * ((4*pi)/(Wavenumber(energy))**2)
   end subroutine
 
 end program
