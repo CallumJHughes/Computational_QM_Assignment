@@ -24,7 +24,7 @@ program main
 
   print *, 'Bob' ! Test
 
-  do intenergy=0,10
+  do intenergy = 0, 10
     print *, intenergy
     energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
     print *, energy
@@ -119,3 +119,4 @@ end program
 !!!!!!!!!!!!!
 ! – Chi used in CalculatePhaseShift might not be correct; rest should be okay
 ! – Use subroutine to check if lmax blah blah is approx. krmax using while loop
+! – Add I/O
