@@ -24,7 +24,7 @@ program main
 
   print *, 'Bob' ! Test
 
-  do intenergy=0,2
+  do intenergy=0,10
     print *, intenergy
     energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
     print *, energy
@@ -76,7 +76,7 @@ contains
     !!! (Solve quadratic lmax**2 + lmax - (krmax)**2 = 0???)
     integer :: AngMomentumMax, angMomentum
 
-    AngMomentumMax = angMomentum ! Just for testing
+    AngMomentumMax = 2 ! Just for testing
   end function
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,10 +104,12 @@ contains
     sigma = 0
 
     do angMomentum = 0, angMomentumMax(angMomentum)
-      sigma = sigma + ((2*angMomentum + 1)*(sin(deltaL))**2)
+      sigma = sigma + ((2*angMomentum + 1)*(sin(deltaL))**2) ! Calculates summation part over different angular momentums
     end do
 
-    sigma = sigma * ((4*pi)/(Wavenumber(energy))**2)
+    sigma = sigma * ((4*pi)/(Wavenumber(energy))**2) ! Multiplies values from summation with coefficient
+
+    print *, 'Cross section is: ', sigma
   end subroutine
 
 end program
