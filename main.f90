@@ -15,7 +15,7 @@ program main
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   !energy = 8 ! Energy of incoming wave
-  radius = 1.0
+  radius = 4.0
   R0 = 2.0
   n = 1
   angMomentum = 1 ! Defines value for angular momentum of wave
