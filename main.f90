@@ -126,3 +126,4 @@ end program
 ! – Add I/O
 ! – Need to rethink, write pseudocode
 ! – For Chi look at answer for question ci
+! – LOOK AT PRACTICALS
