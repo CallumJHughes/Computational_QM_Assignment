@@ -8,7 +8,8 @@ program main
 
   integer :: angMomentum, n, intenergy
   real (kind=dp) :: energy, Potential, radius,  deltaL, R0, totalPsi, sigma
-  real (kind=dp) :: pi = atan(1.0) * 4.0
+  real (kind=dp), parameter :: pi = atan(1.0) * 4.0
+  complex, parameter :: i = complex(0.0,1.0)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
@@ -28,6 +29,7 @@ program main
     print *, intenergy
     energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
     print *, energy
+    print *, 'Chi is: ', Chi(Wavenumber(energy),radius)
     call CalculatePhaseShift
     call CalcTotCrossSection
   end do
@@ -36,11 +38,12 @@ program main
 !!!!!!!!!!!!!!! FUNCTIONS !!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contains
-  function Chi(R,radius)
+  function Chi(Wavenumber,radius)
     !!! Function to calculate the value for Chi (What is chi) !!!
-    real (kind=dp) :: Chi, radius, R
+    real (kind=dp) ::  Wavenumber, radius
+    complex :: Chi
 
-    Chi = R * radius
+    Chi = exp(i*Wavenumber*radius)
   end function
 
   function R(radius,R0,n)
@@ -65,9 +68,10 @@ contains
 
   function Psi(Chi,radius)
     !!! Calculate wavefunction for current radial function (chi) of current angular momentum !!!
-    real (kind=dp) :: Psi, Chi, radius
+    real (kind=dp) :: Psi, radius
+    complex :: Chi
 
-    Psi = Chi(R,radius) / radius
+    Psi = Chi(Wavenumber(energy),radius) / radius
   end function
 
   function AngMomentumMax(angMomentum)
@@ -120,3 +124,4 @@ end program
 ! – Chi used in CalculatePhaseShift might not be correct; rest should be okay
 ! – Use subroutine to check if lmax blah blah is approx. krmax using while loop
 ! – Add I/O
+! – Need to rethink, write pseudocode
