@@ -125,3 +125,4 @@ end program
 ! – Use subroutine to check if lmax blah blah is approx. krmax using while loop
 ! – Add I/O
 ! – Need to rethink, write pseudocode
+! – For Chi look at answer for question ci
