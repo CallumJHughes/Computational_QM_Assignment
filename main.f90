@@ -6,124 +6,271 @@ program main
 !!!!!!!!!!!! DEFINE OBJECTS !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer :: angMomentum, n, intenergy
-  real (kind=dp) :: energy, Potential, radius,  deltaL, R0, totalPsi, sigma
-  real (kind=dp), parameter :: pi = atan(1.0) * 4.0
-  complex, parameter :: i = complex(0.0,1.0)
+  integer :: l, lmax, Rmax, step, Estep
+  real (kind=dp) :: r, Chi, Z, V0, E, Veff, h, r1, r2, Rv, sigma
+  real (kind=dp), dimension(:), allocatable :: rData, ChiData, VData, VeffData, ChiUnscatData, DeltaData
+  real (kind=dp), parameter :: pi = 4*atan(1.0)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  !energy = 8 ! Energy of incoming wave
-  radius = 4.0
-  R0 = 2.0
-  n = 1
-  angMomentum = 1 ! Defines value for angular momentum of wave
+  h = 0.001 ! Step size for integration
+  Rmax = 40 ! Maximum value for integration
+  V0 = -1 ! Depth of potential well
+  step = 1 ! Number of steps used in certain procedures
+  Rv = 2 ! Width of potential
+  E = 1 ! Energy value used to calculate maximum angular momentum
 
-  print *, R(radius,R0,n)
+  call CalcMaxAngMom
+  print *, 'Maximum Angular Momentum:', lmax
+  allocate(DeltaData(0:lmax)) ! Allocates DeltaData to start at 0, since l starts at 0
 
-  print *, 'Bob' ! Test
-
-  do intenergy = 0, 10
-    print *, intenergy
-    energy = real(intenergy) / 10 ! Converts integer energy value to real value and a 1/10th
-    print *, energy
-    print *, 'Chi is: ', Chi(Wavenumber(energy),radius)
-    call CalculatePhaseShift
-    call CalcTotCrossSection
+  do Estep = 1, 10
+    E = real(Estep) / 10
+    do l = 0, lmax
+      print *, '----------------------------------------------'
+      print *, 'Current Energy:', E
+      print *, 'Current Angular Momentum:', l
+      call AllocateArrays
+      call Solve
+      call WriteData
+      call FindR1
+      call FindR2
+      call DeallocateArrays
+      DeltaData(l) = PhaseShift(r1,r2,pi)
+      print *, 'Phase Shift:', PhaseShift(r1,r2,pi)
+    end do
+    call CalcCrossSection
   end do
 
+contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!! FUNCTIONS !!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-contains
-  function Chi(Wavenumber,radius)
-    !!! Function to calculate the value for Chi (What is chi) !!!
-    real (kind=dp) ::  Wavenumber, radius
-    complex :: Chi
+  function V(r)
+    !!! Function to define the potential !!!
+    real (kind=dp) :: V, r
 
-    Chi = exp(i*Wavenumber*radius)
-  end function
-
-  function R(radius,R0,n)
-    !!! Function to to define trial wavefunction !!!
-    real (kind=dp) :: R, R0,  radius
-    integer :: n
-
-    if (radius .LE. R0) then
-      R = 1 - (radius/R0)**n
+    if (r < Rv) then
+      V = V0
     else
-      R = 0
+      V = 0
     end if
   end function
 
-  function Wavenumber(energy)
-    !!! Function to calculate wavenumber k of outgoing wave !!!
-    !!! This is also wavenumber of incoming wave since we assume an elastic collision !!!
-    real (kind=dp) :: Wavenumber, energy
+  function f(r,E)
+    !!! Function to be integrated !!!
+    real (kind=dp) :: f, r, E
 
-    wavenumber = sqrt(energy * 2)
+    f = -2.0*(E-V(r)-(l*(l+1)/(2*(r**2))))
   end function
 
-  function Psi(Chi,radius)
-    !!! Calculate wavefunction for current radial function (chi) of current angular momentum !!!
-    real (kind=dp) :: Psi, radius
-    complex :: Chi
+  function ChiUnscat(E,r)
+    !!! Function to calulate the wave of the unscattered particle !!!
+    real (kind=dp) :: ChiUnscat, E, r
 
-    Psi = Chi(Wavenumber(energy),radius) / radius
+    ChiUnscat = sin(sqrt(2*E)*r)
   end function
 
-  function AngMomentumMax(angMomentum)
-    !!! Calculates maximum angular momentum value !!!
-    !!! Any particles with higher angular momentum will just pass through unaffected so are ignored !!!
-    !!! (Solve quadratic lmax**2 + lmax - (krmax)**2 = 0???)
-    integer :: AngMomentumMax, angMomentum
+  function PhaseShift(r1,r2,pi)
+    !!! Function to calculate the phase shift between unscattered and scattered particles !!!
+    !!! Returns value between -pi/2 < r < pi/2 as required !!!
+    real (kind=dp) :: PhaseShift, r1, r2, pi
 
-    AngMomentumMax = 2 ! Just for testing
+    if ((r2-r1) .GT. (pi/2)) then
+      PhaseShift = (r2 - r1) - (pi/2)
+    else if ((r2-r1) .LT. -(pi/2)) then
+      PhaseShift = (r2 - r1) + (pi/2)
+    else
+      PhaseShift = r2 - r1
+    end if
   end function
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!! SUBROUTINES !!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine CalculatePhaseShift
-    !!! Suboroutine to calculate the phase shift !!!
-    deltaL = asin(radius*R(radius,R0,n)) + (angMomentum*(pi/2)) - (Wavenumber(energy)*radius)
+  subroutine CalcMaxAngMom
+    !!! Subroutine to calculate the maximum angular momentum that will 'feel' the potential !!!
+    integer :: l
 
-    print *, 'Phase shift is: ', deltaL
-  end subroutine
-
-  subroutine CalculateTotalWavefunction
-    !!! Calculates total wavefunction by numerically chi over all possible angular momentums !!!
-    !!! This gives solution to Schroedinger Equation !!!
-    !!! Constants including Normalisation constants are absorbed and set to 1 !!!
-    do angMomentum = 0, AngMomentumMax(angMomentum)
-      totalPsi = totalPsi + Psi(Chi,radius)
+    do l = 0, 20 ! Loops across large number of angular momentums
+      if (int(sqrt(real(l)*(real(l)+1))) .EQ. (int(sqrt(2*E)*Rv))) then ! Tests value of l against k*rmax
+        lmax = l ! Assigns value of l if maximum angular momentum is found
+      else
+        continue
+      end if
     end do
   end subroutine
 
-  subroutine CalcTotCrossSection
-    !!! Subroutine to calculate the total scattering cross section !!!
-    sigma = 0
-
-    do angMomentum = 0, angMomentumMax(angMomentum)
-      sigma = sigma + ((2*angMomentum + 1)*(sin(deltaL))**2) ! Calculates summation part over different angular momentums
-    end do
-
-    sigma = sigma * ((4*pi)/(Wavenumber(energy))**2) ! Multiplies values from summation with coefficient
-
-    print *, 'Cross section is: ', sigma
+  subroutine AllocateArrays
+    !!! Subroutine to allocate most of the arrays to their needed sizes !!!
+    allocate(rData(nint(Rmax/h)))
+    allocate(ChiData(nint(Rmax/h)))
+    allocate(VData(nint(Rmax/h)))
+    allocate(VeffData(nint(Rmax/h)))
+    allocate(ChiUnscatData(nint(Rmax/h)))
   end subroutine
 
-end program
+  subroutine Solve
+    !!! Subroutine to perform integration steps using Euler's method !!!
+    real (kind=dp) :: rnew, Chinew, Znew
+
+    ! Boundary conditions
+    r = h
+    Chi = r**(l+1)
+    Z = (l+1)*(r**l)
+    Veff = V(r)+(l*(l+1)/(2*(r**2)))
+
+    ! Assigns boundary conditions to first element of their respective arrays
+    rData(1) = r
+    ChiData(1) = Chi
+    VData(1) = V(r)
+    VeffData(1) = Veff
+
+    step = 1 ! Reset step value
+
+    ! Integration
+    do while (r < Rmax)
+      ChiUnscatData(step) = ChiUnscat(E,r)
+      rnew=r + h
+      Chinew=Chi+Z*h
+      Znew = Z + f(r,E)*Chi*h
+      r = rnew
+      Chi = Chinew
+      Z = Znew
+      Veff=V(r)+(l*(l+1)/(2*(r**2)))
+
+      rData(step) = r
+      ChiData(step) = Chi
+      VData(step) = V(r)
+      VeffData(step) = Veff
+      
+      step = step + 1
+    end do
+  end subroutine
+
+  subroutine WriteData
+    !!! Subroutine to write the necessary data to external data files !!!
+    character (len=50) :: Elabel
+
+    write(Elabel,*) Estep
+
+    open(unit=1, file="ChiData"//trim(adjustl(Elabel))//".dat")
+    open(unit=2, file="VData"//trim(adjustl(Elabel))//".dat")
+    open(unit=3, file="VeffData"//trim(adjustl(Elabel))//".dat")
+    open(unit=4, file="ChiUnscatData"//trim(adjustl(Elabel))//".dat")
+
+    do step = 1, nint(Rmax/h)
+      write(1,*) Rdata(step), ChiData(step)
+      write(2,*) Rdata(step), VData(step)
+      write(3,*) Rdata(step), VeffData(step)
+      write(4,*) Rdata(step), ChiUnscatData(step)
+    end do
+
+    close(1)
+    close(2)
+    close(3)
+    close(4)
+  end subroutine
+
+  subroutine FindR1
+    !!! Subroutine to find the r value for when the scattered wave cross the x-axis !!!
+    logical :: check
+    integer :: step
+    real (kind=dp) :: x, y, a, b
+
+    r1 = 0
+
+    do step = int((Rmax-10)/h), int((Rmax/h)-1)
+      a = 1.0
+      b = ChiData(step) ! Data from scattered wave
+      x = sign(a,b) ! Returns a with sign of b
+
+      b = ChiData(step+1) ! Next data point from scattered wave
+      y = sign(a,b) ! Returns a with sign of b
+
+      if (x .LT. 0 .AND. y .GT. 0) then ! Checks if there is a sign difference between x and y (-x and +y)
+        if (r1 .EQ. 0) then ! Checks if r1 has been allocated a value yet
+          r1 = step * h
+          print *, 'r1: ', r1
+        else
+          continue
+        end if
+      else if (x .GT. 0 .AND. y .LT. 0) then ! Checks if there is a sign difference between x and y (+x and -y)
+        if (r1 .EQ. 0) then ! Checks if r1 has been allocated a value yet
+          r1 = step * h
+          print *, 'r1: ', r1
+        else
+          continue
+        end if
+      else
+        continue
+      end if
+    end do
+  end subroutine
+
+  subroutine FindR2
+    !!! Subroutine to find the r value for when the unscattered wave cross the x-axis !!!
+    logical :: check
+    integer :: step
+    real (kind=dp) :: x, y, a, b
+
+    r2 = 0
+
+    do step = nint((Rmax-5)/h), nint((Rmax/h)-1) ! 
+      a = 1.0
+      b = ChiUnscatData(step) ! Data from scattered wave
+      x = sign(a,b) ! Returns a with sign of b
+
+      b = ChiUnscatData(step+1) ! Next data point from scattered wave
+      y = sign(a,b) ! Returns a with sign of b
+
+      if (x .LT. 0 .AND. y .GT. 0) then ! Checks if there is a sign difference between x and y (-x and +y)
+        if (r2 .EQ. 0) then ! Checks if r1 has been allocated a value yet
+          r2 = step * h
+          print *, 'r2: ', r2
+        else
+          continue
+        end if
+      else if (x .GT. 0 .AND. y .LT. 0) then ! Checks if there is a sign difference between x and y (+x and -y)
+        if (r2 .EQ. 0) then ! Checks if r1 has been allocated a value yet
+          r2 = step * h
+          print *, 'r2: ', r2
+        else
+          continue
+        end if
+      else
+        continue
+      end if
+    end do
+  end subroutine
+
+  subroutine CalcCrossSection
+    !!! Subroutine to Calculate the total scattering cross-section for a given energy !!!
+    sigma = 0 ! Initial value
+
+    ! Finds sigma by integrating across all possible angular momentums
+    do l = 0, lmax
+      sigma = sigma + ((2*l)+1)*(sin(DeltaData(l))**2)
+    end do
+
+    sigma = sigma * ((4*pi)/(2*E)) ! Multiplies integral by coefficient
+    print *, '----------------------------------------------'
+    print *, 'Total Scattering Cross-Section for Energy of',E,':', sigma
+  end subroutine
+
+  subroutine DeallocateArrays
+    !!! Subroutine to deallocate arrays as needed for next step in loop !!!
+    deallocate(rData)
+    deallocate(ChiData)
+    deallocate(VData)
+    deallocate(VeffData)
+    deallocate(ChiUnscatData)
+  end subroutine
+end program main
 
 !!!!!!!!!!!!!
 !!! NOTES !!!
 !!!!!!!!!!!!!
-! – Chi used in CalculatePhaseShift might not be correct; rest should be okay
-! – Use subroutine to check if lmax blah blah is approx. krmax using while loop
-! – Add I/O
-! – Need to rethink, write pseudocode
-! – For Chi look at answer for question ci
-! – LOOK AT PRACTICALS
