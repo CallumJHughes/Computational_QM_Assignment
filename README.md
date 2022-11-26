@@ -4,17 +4,19 @@
 
 *This program was written, compiled, and run on MacOS Monterey Version 12.2.1 in a 'zsh' shell. Although bash was not tested, 'zsh' is built from 'bash' so it should still work.*
 
-To compile, the following line was run in the terminal:
+To compile, the following line needs to be run in the terminal:
 
 '''
-$ gfortran -o main main.f90
+$ make
 '''
 
-This will produce an executable called 'main' which can then be run by putting the following line into the terminal:
+In order to run the program, the script 'run.sh' needs to be executed. This is done by first moving into the 'bin' directory, then executing the following line :
 
 '''
-$ ./main
+$ ./run.sh
 '''
+
+The output data files are found in the 'data' directory. It should be noted that with each run the data files will be overwritten and so it is up to the user to save these files in another directory. 
 
 ## Output
 
