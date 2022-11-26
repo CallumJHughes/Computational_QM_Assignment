@@ -7,20 +7,13 @@ program main
 !!!!!!!!!!!! DEFINE OBJECTS !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer :: l, lmax, Estep
-  real (kind=dp) :: r, Chi, Z, Veff, r1, r2, sigma
+  integer :: l, lmax, Estep, step
+  real (kind=dp) :: r, Chi, Z, Veff, r1, r2, sigma, E
   real (kind=dp), dimension(:), allocatable :: rData, ChiData, VData, VeffData, ChiUnscatData, DeltaData
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  h = 0.001 ! Step size for integration
-  Rmax = 40 ! Maximum value for integration
-  V0 = -1 ! Depth of potential well
-  step = 1 ! Number of steps used in certain procedures
-  Rv = 2 ! Width of potential
-  E = 1 ! Energy value used to calculate maximum angular momentum
 
   call CalcMaxAngMom
   print *, 'Maximum Angular Momentum:', lmax
