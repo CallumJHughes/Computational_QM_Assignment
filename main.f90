@@ -1,15 +1,15 @@
 program main
+  use constants
+  use parameters
   implicit none
-  integer, parameter :: dp=selected_real_kind(15,300)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! DEFINE OBJECTS !!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer :: l, lmax, Rmax, step, Estep
-  real (kind=dp) :: r, Chi, Z, V0, E, Veff, h, r1, r2, Rv, sigma
+  integer :: l, lmax, Estep
+  real (kind=dp) :: r, Chi, Z, Veff, r1, r2, sigma
   real (kind=dp), dimension(:), allocatable :: rData, ChiData, VData, VeffData, ChiUnscatData, DeltaData
-  real (kind=dp), parameter :: pi = 4*atan(1.0)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!! MAIN PROGRAMME !!!!!!!!!!!!
@@ -270,7 +270,3 @@ contains
     deallocate(ChiUnscatData)
   end subroutine
 end program main
-
-!!!!!!!!!!!!!
-!!! NOTES !!!
-!!!!!!!!!!!!!
