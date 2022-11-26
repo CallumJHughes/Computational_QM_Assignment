@@ -1,4 +1,8 @@
 program main
+!======================================!
+! Written by Callum Hughes, 19/02/2022 !
+!======================================!
+
   use constants
   use parameters
   implicit none
